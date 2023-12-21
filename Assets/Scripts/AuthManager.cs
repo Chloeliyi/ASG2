@@ -27,6 +27,10 @@ public class AuthManager : MonoBehaviour
     [SerializeField] private TMP_InputField AdminemailLogIn;
     [SerializeField] private TMP_InputField AdminpasswordLogIn;
 
+    [SerializeField] private TextMeshProUGUI profileName;
+    [SerializeField] private TextMeshProUGUI profileEmail;
+    [SerializeField] private TextMeshProUGUI profilePassword;
+
     public GameObject StartMenu;
 
     public GameObject LogInMenu;
@@ -41,6 +45,10 @@ public class AuthManager : MonoBehaviour
 
     public GameObject LeaderMenu;
 
+    public GameObject QuizMenu;
+
+    public GameObject PuzzleMenu;
+
     public GameObject AdminViewMenu;
 
     private bool userStatus = false;
@@ -52,6 +60,10 @@ public class AuthManager : MonoBehaviour
     private string username;
     private string email;
     private string password;
+
+    private int checkpoints;
+    private int quizpoints;
+    private float time;
 
     private string adminemail;
     private string adminpassword;
@@ -104,6 +116,20 @@ public class AuthManager : MonoBehaviour
                     string json = JsonUtility.ToJson(user);
                     mDatabaseRef.Child("Users").Child(userId).SetRawJsonValueAsync(json);
 
+                    profileName.text = username;
+
+                    profileEmail.text = email;
+                    
+                    var passwordLength = password.Length;
+                    
+                    for (var i = 0; i <= passwordLength; i ++) {
+                        profilePassword.text += "*";
+                    }
+
+                    CreateAdmin(userId);
+
+                    CreateNewLeader (username); 
+
                     ClearSignUpFields();
                     
                     ToggleSignUpForm();
@@ -154,7 +180,7 @@ public class AuthManager : MonoBehaviour
                 childUpdates[userId + "/userStatus"] = userStatus;
                 Updateref.UpdateChildrenAsync(childUpdates);
 
-                /*mDatabaseRef.Child("Users").Child(userId).GetValueAsync().ContinueWithOnMainThread(task => 
+                mDatabaseRef.Child("Users").Child(userId).GetValueAsync().ContinueWithOnMainThread(task => 
                 {
                     if (task.IsFaulted) 
                     {
@@ -167,7 +193,7 @@ public class AuthManager : MonoBehaviour
                         User user = JsonUtility.FromJson<User>(json);
                         Debug.Log(user.username);
 
-                        profileName.text = player.username;
+                        profileName.text = user.username;
                     }
                 });
 
@@ -177,7 +203,7 @@ public class AuthManager : MonoBehaviour
 
                 for (var i = 0; i <= passwordLength; i ++) {
                     profilePassword.text += "*";
-                }*/
+                }
 
                 ClearLogInFields(); 
 
@@ -195,6 +221,17 @@ public class AuthManager : MonoBehaviour
 
         LogInAdmin(email, password);
 
+    }
+
+    public void CreateAdmin(string userId)
+    {
+        adminId = userId;
+        Debug.Log("adminId is: " + userId);
+        adminStatus = false;
+                    
+        Admin admin = new Admin(username, email, password, adminStatus);
+        string json = JsonUtility.ToJson(admin);
+        mDatabaseRef.Child("Admins").Child(adminId).SetRawJsonValueAsync(json);
     }
 
     public void LogInAdmin(string email, string password)
@@ -231,7 +268,7 @@ public class AuthManager : MonoBehaviour
 
                 ClearAdminFields();
 
-                 ToggleAdminForm();
+                ToggleAdminForm();
                 ToggleAdminViewMenu();
             }
 
@@ -249,14 +286,81 @@ public class AuthManager : MonoBehaviour
         childUpdates[userId + "/userStatus"] = userStatus;
         Updateref.UpdateChildrenAsync(childUpdates);
 
-        //profileName.text = "";
-        //profileEmail.text = "";
-        //profilePassword.text = "";
+        profileName.text = "";
+        profileEmail.text = "";
+        profilePassword.text = "";
 
         Debug.Log("User has log out.");
 
-        ToggleGameMenu();
-        ToggleStartMenu();
+        adminStatus = false;
+        DatabaseReference newUpdateref = FirebaseDatabase.DefaultInstance.GetReference("Admins/");
+        
+        Dictionary<string, object> newchildUpdates = new Dictionary<string, object>();
+        newchildUpdates[adminId + "/adminStatus"] = adminStatus;
+        Updateref.UpdateChildrenAsync(newchildUpdates);
+
+        if (QuizMenu.activeSelf == true) 
+        {
+            ToggleQuizMenu();
+        }
+        else if (PuzzleMenu.activeSelf == true) 
+        {
+            TogglePuzzleMenu();
+        }
+        else 
+        {
+            ToggleGameMenu();
+            ToggleStartMenu();
+        }
+
+        //ToggleGameMenu();
+        //ToggleQuizMenu();
+        //TogglePuzzleMenu();
+        //ToggleStartMenu();
+    }
+
+    /*public void GetLeaderDetails(int quizpoints, int checkpoints) 
+    {
+        Debug.Log(quizpoints);
+        Debug.Log(checkpoints);
+        username = profileName.text.Trim();
+        time = 10;
+
+        CreateNewLeader(username, checkpoints, time, quizpoints);
+    }*/
+
+    private void CreateNewLeader (string username) 
+    {
+        checkpoints = 0;
+        quizpoints = 0;
+        time = 10;
+
+        Leaderboard leader = new Leaderboard(username, checkpoints, time, quizpoints);
+        string json = JsonUtility.ToJson(leader);
+        mDatabaseRef.Child("Leaderboard").Child(userId).SetRawJsonValueAsync(json);
+
+    }
+
+    public void CheckForNewQuizScore(int quizpoints) 
+    {
+        mDatabaseRef.Child("Leaderboard").Child(userId).GetValueAsync().ContinueWithOnMainThread(task =>
+        {
+            if (task.IsCompleted) 
+            {
+                string json = task.Result.GetRawJsonValue();
+                Leaderboard leader = JsonUtility.FromJson<Leaderboard>(json);
+                if (quizpoints > leader.quizpoints) 
+                {
+                    DatabaseReference UpdateLeader= FirebaseDatabase.DefaultInstance.GetReference("Leaderboard/");
+                    Dictionary<string, object> childUpdates = new Dictionary<string, object>();
+                    childUpdates[userId + "/quizpoints"] = quizpoints;
+                    UpdateLeader.UpdateChildrenAsync(childUpdates);
+                }
+                else {
+                    Debug.Log("Score did not go past previous high score");
+                }
+            }
+        });
     }
 
     private void ClearSignUpFields() 
@@ -319,6 +423,20 @@ public class AuthManager : MonoBehaviour
 
         GameMenu.SetActive(!isActive);
         Debug.Log("Game Menu " + GameMenu.activeSelf);
+    }
+
+    public void ToggleQuizMenu() {
+        bool isActive = QuizMenu.activeSelf;
+
+        QuizMenu.SetActive(!isActive);
+        Debug.Log("Quiz Menu " + QuizMenu.activeSelf);
+    }
+
+    public void TogglePuzzleMenu() {
+        bool isActive = PuzzleMenu.activeSelf;
+
+        PuzzleMenu.SetActive(!isActive);
+        Debug.Log("Puzzle Menu " + PuzzleMenu.activeSelf);
     }
 
     public void ToggleAdminViewMenu() {

@@ -1,12 +1,12 @@
-public class Leader {
+public class Leaderboard {
     public string username;
-    public float checkpoints;
+    public int checkpoints;
     public float time;
     public int quizpoints;
-    public Leader() {
+    public Leaderboard() {
     }
 
-    public Leader(string username, float checkpoints, float time, int quizpoints) {
+    public Leaderboard(string username, int checkpoints, float time, int quizpoints) {
         this.username = username;
         this.checkpoints = checkpoints;
         this.time = time;
