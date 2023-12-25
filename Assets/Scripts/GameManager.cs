@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 
 public class GameManager : MonoBehaviour
@@ -21,6 +22,14 @@ public class GameManager : MonoBehaviour
 
     public GameObject AdminMenu;
 
+    public GameObject LocationMenu;
+
+    public GameObject ExhibitOneButton;
+
+    public GameObject ExhibitTwoButton;
+
+    public GameObject PreviousLocationButton;
+
     public GameObject QuizMenu;
 
     public GameObject LeaderMenu;
@@ -29,7 +38,7 @@ public class GameManager : MonoBehaviour
 
     public GameObject PuzzleMenu;
 
-    public GameObject DirectionMenu;
+    public GameObject GameDirectionMenu;
 
     public GameObject QuizDirection;
 
@@ -39,18 +48,28 @@ public class GameManager : MonoBehaviour
 
     public GameObject PuzzleDirection;
 
+    public GameObject MainMenuDirection;
+
     public GameObject PlayerMenus;
 
     public GameObject LogOutMenu;
 
     public GameObject CheckpointMenu;
 
+    public GameObject ZoomInMenu;
+
+    public GameObject ZoomInImage;
+
     [SerializeField] private Material[] Museum;
 
-    private int Walk;
+    [SerializeField] private Sprite[] ZoomInSprite;
+
+    [SerializeField] private int Walk;
+
+    [SerializeField] private int SpriteImage;
 
     [SerializeField] private TextMeshProUGUI CheckpointText;
-    public int checkpoints = 0;
+    [SerializeField] public int checkpoints = 0;
 
     private void Start()
     {
@@ -60,12 +79,15 @@ public class GameManager : MonoBehaviour
         LogInMenu.gameObject.SetActive(false);
         AdminMenu.gameObject.SetActive(false);
         GameMenu.gameObject.SetActive(false);
-        DirectionMenu.gameObject.SetActive(false);
+        GameDirectionMenu.gameObject.SetActive(false);
         LogOutMenu.gameObject.SetActive(false);
         CheckpointMenu.gameObject.SetActive(false);
+        ZoomInMenu.gameObject.SetActive(false);
 
         Walk = 0;
         RenderSettings.skybox = Museum[Walk];
+
+        SpriteImage = 0;
     }
 
     public void OnLogInButton()
@@ -97,15 +119,65 @@ public class GameManager : MonoBehaviour
 
     public void OnGameStart()
     {
-        //RenderSettings.skybox = mat1;
         Walk ++;
         RenderSettings.skybox = Museum[Walk];
-        DirectionMenu.gameObject.SetActive(true);
+        LocationMenu.gameObject.SetActive(true);
+        ExhibitOneButton.gameObject.SetActive(true);
+        ExhibitTwoButton.gameObject.SetActive(true);
+        PreviousLocationButton.gameObject.SetActive(false);
         LogOutMenu.gameObject.SetActive(true);
+
         CheckpointMenu.gameObject.SetActive(true);
         CheckpointText.text = "Checkpoint : " + checkpoints;
+
         PlayerMenus.gameObject.SetActive(false);
+
+        GameDirectionMenu.gameObject.SetActive(true);
+        QuizDirection.gameObject.SetActive(false);
+        PuzzleDirection.gameObject.SetActive(false);
+        MainMenuDirection.gameObject.SetActive(true);
         
+    }
+
+    public void GoToExhibitOne()
+    {
+        Walk = 2;
+        RenderSettings.skybox = Museum[Walk];
+
+        QuizDirection.gameObject.SetActive(true);
+        MainMenuDirection.gameObject.SetActive(false);
+        ZoomInMenu.gameObject.SetActive(true);
+            
+        ExhibitOneButton.gameObject.SetActive(false);
+        
+    }
+
+     public void GoToExhibitTwo()
+    {
+        Walk = 3;
+        RenderSettings.skybox = Museum[Walk];
+
+        PuzzleDirection.gameObject.SetActive(true);
+        MainMenuDirection.gameObject.SetActive(false);  
+        ZoomInMenu.gameObject.SetActive(true);
+
+        ExhibitTwoButton.gameObject.SetActive(false);
+        
+    }
+
+    public void PreviousLocation()
+    {
+        Walk --;
+        RenderSettings.skybox = Museum[Walk];
+
+        if (Walk == 1)
+        {
+            ExhibitOneButton.gameObject.SetActive(true);
+            ExhibitTwoButton.gameObject.SetActive(true);
+            PreviousLocationButton.gameObject.SetActive(false);
+
+            MainMenuDirection.gameObject.SetActive(true);
+        }
     }
 
     public void OnProfileButton()
@@ -161,33 +233,32 @@ public class GameManager : MonoBehaviour
     {
         QuizMenu.gameObject.SetActive(true);
         QuizDirection.gameObject.SetActive(false);
-        PuzzleDirection.gameObject.SetActive(false);
-        Walk = 3;
-        RenderSettings.skybox = Museum[Walk];
+        /*Walk = 2;
+        RenderSettings.skybox = Museum[Walk];*/
 
         LogOutMenu.gameObject.SetActive(false);
         CheckpointMenu.gameObject.SetActive(false);
+        ZoomInMenu.gameObject.SetActive(false);
     }
 
     public void QuizComplete()
     {
         QuizMenu.gameObject.SetActive(false);
         QuizDirection.gameObject.SetActive(true);
-        PuzzleDirection.gameObject.SetActive(true);
-        Walk = 2;
-        RenderSettings.skybox = Museum[Walk];
+        /*MainMenuDirection.gameObject.SetActive(true);*/
 
         LogOutMenu.gameObject.SetActive(true);
         CheckpointMenu.gameObject.SetActive(true);
+
+        ZoomInMenu.gameObject.SetActive(true);
+
+        PreviousLocationButton.gameObject.SetActive(true);
     }
 
     public void PuzzleStart()
     {
         PuzzleMenu.gameObject.SetActive(true);
-        QuizDirection.gameObject.SetActive(false);
         PuzzleDirection.gameObject.SetActive(false);
-        Walk = 4;
-        RenderSettings.skybox = Museum[Walk];
 
         LogOutMenu.gameObject.SetActive(false);
         CheckpointMenu.gameObject.SetActive(false);
@@ -196,12 +267,44 @@ public class GameManager : MonoBehaviour
     public void PuzzleComplete()
     {
         PuzzleMenu.gameObject.SetActive(false);
-        QuizDirection.gameObject.SetActive(true);
         PuzzleDirection.gameObject.SetActive(true);
-        Walk = 2;
-        RenderSettings.skybox = Museum[Walk];
+        /*MainMenuDirection.gameObject.SetActive(true);*/
 
         LogOutMenu.gameObject.SetActive(true);
         CheckpointMenu.gameObject.SetActive(true);
+
+        PreviousLocationButton.gameObject.SetActive(true);
+    }
+
+    public void GoToMenu()
+    {
+        PlayerMenus.gameObject.SetActive(true);
+        GameMenu.gameObject.SetActive(true);
+        GameDirectionMenu.gameObject.SetActive(false);
+        LocationMenu.gameObject.SetActive(false);
+        Walk = 0;
+        RenderSettings.skybox = Museum[Walk];
+
+        LogOutMenu.gameObject.SetActive(false);
+        CheckpointMenu.gameObject.SetActive(false);
+    }
+
+    public void ZoomInPhoto()
+    {
+        ZoomInImage.gameObject.SetActive(true);
+        ZoomInMenu.gameObject.SetActive(false);
+        QuizDirection.gameObject.SetActive(false);
+
+        if (Walk == 2)
+        {
+            ZoomInImage.gameObject.GetComponent<Image>().sprite = ZoomInSprite[SpriteImage];
+        }
+    }
+
+    public void ZoomOutPhoto()
+    {
+        ZoomInImage.gameObject.SetActive(false);
+        ZoomInMenu.gameObject.SetActive(true);
+        QuizDirection.gameObject.SetActive(true);
     }
 }

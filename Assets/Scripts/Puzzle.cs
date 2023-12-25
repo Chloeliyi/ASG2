@@ -9,6 +9,7 @@ public class Puzzle : MonoBehaviour
 
     private int emptyLocation;
     private int size;
+    //private bool shuffling = false;
 
     private int checkpoints;
 
@@ -57,8 +58,41 @@ public class Puzzle : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+      /*if (!shuffling) 
+      {
+        shuffling = true;
+        StartCoroutine(WaitShuffle(0.5f));
+      }*/
     }
+
+    /*private IEnumerator WaitShuffle(float duration) 
+    {
+      yield return new WaitForSeconds(duration);
+      Shuffle();
+      shuffling = false;
+      }
+      
+      private void Shuffle() {
+        int count = 0;
+        int last = 0;
+        while (count < (size * size * size)) {
+          // Pick a random location.
+          int rnd = Random.Range(0, size * size);
+          // Only thing we forbid is undoing the last move.
+          if (rnd == last) { continue; }
+          last = emptyLocation;
+          // Try surrounding spaces looking for valid move.
+          if (SwapIfValid(rnd, -size, size)) {
+            count++;
+            } else if (SwapIfValid(rnd, +size, size)) {
+              count++;
+              } else if (SwapIfValid(rnd, -1, 0)) {
+                count++;
+                } else if (SwapIfValid(rnd, +1, size - 1)) {
+                  count++;
+                  }
+        }
+      }*/
 
     public void PuzzleComplete()
     {

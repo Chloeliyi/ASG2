@@ -292,13 +292,6 @@ public class AuthManager : MonoBehaviour
 
         Debug.Log("User has log out.");
 
-        adminStatus = false;
-        DatabaseReference newUpdateref = FirebaseDatabase.DefaultInstance.GetReference("Admins/");
-        
-        Dictionary<string, object> newchildUpdates = new Dictionary<string, object>();
-        newchildUpdates[adminId + "/adminStatus"] = adminStatus;
-        Updateref.UpdateChildrenAsync(newchildUpdates);
-
         if (QuizMenu.activeSelf == true) 
         {
             ToggleQuizMenu();
@@ -317,6 +310,20 @@ public class AuthManager : MonoBehaviour
         //ToggleQuizMenu();
         //TogglePuzzleMenu();
         //ToggleStartMenu();
+    }
+
+    public void AdminLogOut()
+    {
+        FirebaseAuth.DefaultInstance.SignOut();
+
+        adminStatus = false;
+        DatabaseReference Updateref = FirebaseDatabase.DefaultInstance.GetReference("Admins/");
+        
+        Dictionary<string, object> childUpdates = new Dictionary<string, object>();
+        childUpdates[adminId + "/adminStatus"] = adminStatus;
+        Updateref.UpdateChildrenAsync(childUpdates);
+
+        Debug.Log("Admin has log out.");
     }
 
     /*public void GetLeaderDetails(int quizpoints, int checkpoints) 
